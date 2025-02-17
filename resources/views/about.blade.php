@@ -6,7 +6,7 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>This is about page!. Your name is {{$name}}</h1>
+    <h1>Hello, {{$name}}</h1>
 
     <form action="about" method="post">
         @csrf

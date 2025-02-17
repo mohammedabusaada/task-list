@@ -26,5 +26,5 @@ Route::post('/about', function(){
         '2' => 'Financial',
         '3' => 'Sales'
     ];
-    return view('about', compact('name'));
+    return view('about', compact('name', 'departments'));
 });
