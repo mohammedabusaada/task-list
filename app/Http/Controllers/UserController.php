@@ -3,15 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\DB; We Don't Need This Anymore!
 
 class UserController extends Controller{
 
 
     // Show Users List
     public function index(){
-        $users = DB::table('users')->get();
+        $users = User::all();
         return view('users', compact('users'));
     }
 
@@ -27,12 +28,10 @@ class UserController extends Controller{
         ]);
         
     
-        DB::table('users')->insert([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')), // Hash password for security
-            'created_at' => now(),
-            'updated_at' => now(),
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password), // Hash password for security
         ]);
     
         return redirect('/users')->with('success', 'User added successfully!');
@@ -42,32 +41,39 @@ class UserController extends Controller{
 
     // Update User
     public function update(Request $request, $id){
+        $user = User::findOrFail($id);
+    
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
+            'password' => 'nullable|string|min:6' // Optional (at least 6 Characters)
         ]);
     
-        DB::table('users')->where('id', $id)->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'updated_at' => now(),
-        ]);
+        $user->name = $request->name;
+        $user->email = $request->email;
+    
+        // Check if a new password was provided
+        if (!empty($request->password)) {
+            $user->password = Hash::make($request->password);
+        }
+    
+        $user->save();
     
         return redirect('/users')->with('success', 'User updated successfully!');
     }
     
-    
+
+
     public function edit($id){
-        $user = DB::table('users')->where('id', $id)->first();
-        $users = DB::table('users')->get(); // Keep user list for display
+        $user = User::findOrFail($id);
+        $users = User::all();
         return view('users', compact('user', 'users'));
     }
-    
 
 
     // Delete User
     public function destroy($id){
-        DB::table('users')->where('id', $id)->delete();
+        User::findOrFail($id)->delete();
         return redirect('/users')->with('success', 'User deleted successfully!');
     }
     
